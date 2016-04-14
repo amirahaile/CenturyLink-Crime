@@ -1,5 +1,5 @@
 Rails.application.routes.draw do
 
-  root 'map#index'
+  root 'events#create'
 
 end
