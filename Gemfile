@@ -38,6 +38,9 @@ gem 'bootstrap-sass', '~> 3.3.6'
 # HTTP requests
 gem 'httparty'
 
+# Socrata Open Data API
+gem 'soda-ruby', :require => 'soda'
+
 group :development, :test do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console
   gem 'byebug'
