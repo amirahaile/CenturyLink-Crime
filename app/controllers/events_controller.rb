@@ -1,18 +1,18 @@
 class EventsController < ApplicationController
 
   def create
-    if (fetch?) then
+    if (Event.fetch?) then
       incidents = Event.fetch
 
       incidents.each do |incident|
         if (Event.within_mile_radius?(incident)) then
           event = Event.new
-          event.description = incidient["initial_type_description"]
-          event.timestamp = incident["at_scene_time"]
-          event.group = incident["initial_type_group"]
-          event.zone = incident["zone_beat"]
-          event.lng = incident["longitude"]
-          event.lat = incident["latitude"]
+          event.description = incident.initial_type_description
+          event.datetime = incident.at_scene_time
+          event.group = incident.initial_type_group
+          event.zone = incident.zone_beat
+          event.longitude = incident.longitude
+          event.latitude = incident.latitude
           event.save
         end
       end
