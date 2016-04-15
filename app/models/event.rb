@@ -1,25 +1,32 @@
+class Float
+  def to_radius
+    self * Math::PI / 180
+  end
+end
+
 class Event < ActiveRecord::Base
 
   # Validations ----------------------------------------------------------------
   validates :description, presence: true
-  validates :timestamp, presence: true
+  validates :datetime, presence: true
   validates :group, presence: true
-  validates :zone, presence: true, length: 2
-  validates :lng, presence: true
-  validates :lat, presence: true
+  validates :zone, presence: true, length: {is: 2}
+  validates :longitude, presence: true
+  validates :latitude, presence: true
 
   # Methods --------------------------------------------------------------------
-  class Numeric
-    def to_radius
-      return self * Math::PI / 180
-    end
+  def self.init_socrata
+    @socrata ||= SODA::Client.new({:domain => "explore.data.gov",
+                                   :app_token => "TaAEwamFxC5DPESYEnDDZlNp9"})
   end
 
-  def fetch?
-    return true if Event.last.timestamp.nil?
-    last_fetch_month = Event.last.timestamp[5..6].to_i
-    last_fetch_day = Event.last.timestamp[8..9].to_i
-    last_fetch_hour = Event.last.timestamp[-4..-3].to_i
+  def self.fetch?
+    self.init_socrata
+
+    return true if Event.last.nil?
+    last_fetch_month = Event.last.created_at.month
+    last_fetch_day = Event.last.created_at.day
+    last_fetch_hour = Event.last.created_at.hour
 
     current_month = Time.now.month
     current_day = Time.now.day
@@ -35,31 +42,32 @@ class Event < ActiveRecord::Base
     end
   end
 
-  def fetch
-    seattle_incidents = "3k2p-39jp"
-    events = @socrata.get(seattle_incidents, {
-      "$select" => ["initial_type_description", "at_scene_time",
-                    "initial_type_group", "zone_beat",
-                    "longitude", "latitude"],
+  def self.fetch
+    client = SODA::Client.new({:domain => "data.seattle.gov"})
+    events = client.get("https://data.seattle.gov/resource/3k2p-39jp.json",
+    {
+      "$select" => "initial_type_description, at_scene_time,
+                    initial_type_group, zone_beat,
+                    longitude, latitude",
       "$order" => "at_scene_time"
-      })
+    })
 
     return events
   end
 
-  def within_mile_radius?(event)
+  def self.within_mile_radius?(event)
     centuryLinkCoordinates = {lat: 47.593933, lng: -122.331539}
 
     earthRadius = 3958.75 # miles
-    dlat = (centuryLinkCoordinates.lat - event.lat).to_radius
-    dlng = (centuryLinkCoordinates - event.lng).to_radius
+    dlat = (centuryLinkCoordinates[:lat] - event.latitude.to_f).to_radius
+    dlng = (centuryLinkCoordinates[:lng] - event.longitude.to_f).to_radius
     sin_dlat = Math.sin(dlat / 2);
     sin_dlng = Math.sin(dlng / 2);
 
     # Haversine formula
-    a = Math.pow(sin_dlat, 2) + Math.pow(sin_dlng, 2) *
-        Math.cos(centuryLinkCoordinates.lat.to_radius) *
-        Math.cos(event.lat.to_radius)
+    a = (sin_dlat ** 2) + (sin_dlng ** 2) *
+        Math.cos(centuryLinkCoordinates[:lat].to_radius) *
+        Math.cos(event.latitude.to_f.to_radius)
     c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     distance = earthRadius * c;
 
