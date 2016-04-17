@@ -45,6 +45,8 @@ group :development, :test do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console
   gem 'byebug'
 
+  # Secret keys/credentials for third-party APIs 
+  gem 'dotenv-rails'
 end
 
 group :development do
