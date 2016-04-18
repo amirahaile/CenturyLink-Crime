@@ -1,3 +1,4 @@
+# Helper Method
 class Float
   def to_radius
     self * Math::PI / 180
@@ -13,6 +14,35 @@ class Event < ActiveRecord::Base
   validates :zone, presence: true, length: {is: 2}
   validates :longitude, presence: true
   validates :latitude, presence: true
+
+  # Scopes ---------------------------------------------------------------------
+  def self.of_type(event_types)
+    matching_events = []
+    event_types.each do |type|
+      matching_events << Event.select { |event| event.group == type }
+    end
+
+    matching_events
+  end
+
+  def self.within_mile_radius?(event)
+    centuryLinkCoordinates = {lat: 47.593933, lng: -122.331539}
+
+    earthRadius = 3958.75 # miles
+    dlat = (centuryLinkCoordinates[:lat] - event.latitude.to_f).to_radius
+    dlng = (centuryLinkCoordinates[:lng] - event.longitude.to_f).to_radius
+    sin_dlat = Math.sin(dlat / 2);
+    sin_dlng = Math.sin(dlng / 2);
+
+    # Haversine formula
+    a = (sin_dlat ** 2) + (sin_dlng ** 2) *
+        Math.cos(centuryLinkCoordinates[:lat].to_radius) *
+        Math.cos(event.latitude.to_f.to_radius)
+    c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    distance = earthRadius * c;
+
+    return distance < 1 ? true : false
+  end
 
   # Methods --------------------------------------------------------------------
   def self.init_socrata
@@ -53,24 +83,5 @@ class Event < ActiveRecord::Base
     })
 
     return events
-  end
-
-  def self.within_mile_radius?(event)
-    centuryLinkCoordinates = {lat: 47.593933, lng: -122.331539}
-
-    earthRadius = 3958.75 # miles
-    dlat = (centuryLinkCoordinates[:lat] - event.latitude.to_f).to_radius
-    dlng = (centuryLinkCoordinates[:lng] - event.longitude.to_f).to_radius
-    sin_dlat = Math.sin(dlat / 2);
-    sin_dlng = Math.sin(dlng / 2);
-
-    # Haversine formula
-    a = (sin_dlat ** 2) + (sin_dlng ** 2) *
-        Math.cos(centuryLinkCoordinates[:lat].to_radius) *
-        Math.cos(event.latitude.to_f.to_radius)
-    c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    distance = earthRadius * c;
-
-    return distance < 1 ? true : false
   end
 end

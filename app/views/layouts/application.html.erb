@@ -8,7 +8,18 @@
 </head>
 <body>
 
-<%= yield %>
+  <div class="container-fluid">
 
+    <%= yield %>
+
+  </div>
+
+  <!-- Scripts -->
+  <script defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyClRRQH3SrwT2q9kR0SvCqZ7A4jmWZTZCw&callback=initialize" type="text/javascript"></script>
+  <script src="https://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+  <script>
+    // TODO: The trigger that switches the type of events visualized
+    // d3.select(".event_type").on("click", switch_event_viz(this.id))
+  </script>
 </body>
 </html>

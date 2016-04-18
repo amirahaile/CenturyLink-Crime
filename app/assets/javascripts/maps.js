@@ -1,4 +1,12 @@
+/** @constructor */
+function CrimeOverlay(map) {
+  this.map_ = map;
+  this.setMap(map);
+}
+
 function initialize() {
+  CrimesOverlay = new google.maps.OverlayView();
+
   // Initialize map
   var centuryLinkCoordinates = {lat: 47.593933, lng: -122.331539};
   var map = createMap(centuryLinkCoordinates);
@@ -22,6 +30,8 @@ function initialize() {
     title: 'CenturyLink Field'
   });
 
+  var overlay = new CrimesOverlay(map);
+
   google.maps.event.addDomListener(window, 'load', initialize);
 }
 
@@ -33,6 +43,7 @@ function createMap(coordinates) {
     mapTypeId: google.maps.MapTypeId.ROADMAP
   };
 
-  var googleMap = new google.maps.Map(document.getElementById("map"), mapOptions);
+  var d3Container = d3.select("#map").node();
+  var googleMap = new google.maps.Map(d3Container, mapOptions);
   return googleMap;
 }

@@ -18,6 +18,27 @@ class EventsController < ApplicationController
       end
     end
 
-    redirect_to map_url
+    redirect_to maps_url
+  end
+
+  def show
+    # TODO: Create scopes for event types & timeframes based on param queries
+    # event_types = params[:event_types].split(",")
+    # event_timeframe = params[:timeframe].split(",")
+
+    @events = Event.all
+    prepared_events = []
+    @events.each do |event|
+      json.push({
+        group: event.group,
+        description: event.description,
+        datetime: event.datetime,
+        zone: event.zone,
+        longitude: event.longitude,
+        latitude: event.latitude
+        })
+    end
+
+    render json: prepared_events.to_json
   end
 end
