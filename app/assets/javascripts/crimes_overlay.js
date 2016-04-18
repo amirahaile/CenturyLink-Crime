@@ -27,6 +27,7 @@ CrimeOverlay.prototype.draw = function() {
 
     // Create markers
     var marker = layerDiv.selectAll("svg")
+                        // TODO: Refactor once JSON format is determined.
                          .data(d3.entries(data))
                          .each(transform_marker)
                          .enter().append("svg:svg")
